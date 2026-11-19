@@ -1,5 +1,17 @@
 [
   {
+    "started_at": "2026-11-19T14:49:23+08:00",
+    "status": "未取得运行报告：failure",
+    "phase": "all",
+    "applied": false,
+    "run_id": "44474819576",
+    "attempt": "1",
+    "run_url": "https://github.com/zhucui1202/jihuanshe/actions/runs/44474819576",
+    "warnings": [
+      "报告缺失，不能据此判断表格是否发生过写入；请检查 Actions 日志。"
+    ]
+  },
+  {
     "started_at": "2026-11-19T11:20:08+08:00",
     "finished_at": "2026-11-19T11:20:08+08:00",
     "phase": "初始化：在线表格纠正（非 App 重抓）",
