@@ -1,5 +1,17 @@
 [
   {
+    "started_at": "2026-11-19T17:48:40+08:00",
+    "status": "未取得运行报告：failure",
+    "phase": "phase1",
+    "applied": false,
+    "run_id": "44499695267",
+    "attempt": "1",
+    "run_url": "https://github.com/zhucui1202/jihuanshe/actions/runs/44499695267",
+    "warnings": [
+      "报告缺失，不能据此判断表格是否发生过写入；请检查 Actions 日志。"
+    ]
+  },
+  {
     "started_at": "2026-11-19T15:46:38+08:00",
     "status": "未取得运行报告：failure",
     "phase": "all",
