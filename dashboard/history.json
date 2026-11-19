@@ -1,0 +1,99 @@
+[
+  {
+    "started_at": "2026-11-19T11:20:08+08:00",
+    "finished_at": "2026-11-19T11:20:08+08:00",
+    "phase": "初始化：在线表格纠正（非 App 重抓）",
+    "status": "完成（保留待复核）",
+    "applied": true,
+    "applied_phases": [
+      "历史分类纠正",
+      "Phase2 详情页初始化"
+    ],
+    "run_id": "initial-correction-20261119",
+    "attempt": "1",
+    "run_url": "",
+    "before": {
+      "products": 34,
+      "cards": 6753,
+      "noncards": 188,
+      "review": 8,
+      "failed": 0
+    },
+    "after": {
+      "products": 34,
+      "cards": 6727,
+      "noncards": 214,
+      "review": 7,
+      "failed": 0
+    },
+    "repair": {
+      "moved": 26,
+      "types": {
+        "徽章": 20,
+        "收纳盒": 1,
+        "玩偶": 5
+      },
+      "products": [
+        [
+          "简体中文",
+          "LCNZ",
+          "[简中]官方周边"
+        ]
+      ]
+    },
+    "warnings": [
+      "本条为已完成的在线表格纠正；完整采集仍需要配置 Google Secret 和 Windows runner。"
+    ],
+    "review_products": [
+      {
+        "series": "简体中文",
+        "code": "PR",
+        "name": "[简中]活动PR",
+        "status": "待复核（未见END）",
+        "evidence": "稳定无END（待复核）"
+      },
+      {
+        "series": "推广卡",
+        "code": "P3",
+        "name": "Year 3 推广卡",
+        "status": "抓取完成（END，数量待复核）",
+        "evidence": "END"
+      },
+      {
+        "series": "推广卡",
+        "code": "P2",
+        "name": "Year 2 推广卡",
+        "status": "抓取完成（END，数量待复核）",
+        "evidence": "END"
+      },
+      {
+        "series": "推广卡",
+        "code": "P1",
+        "name": "Year 1 推广卡",
+        "status": "抓取完成（END，数量待复核）",
+        "evidence": "END"
+      },
+      {
+        "series": "推广卡",
+        "code": "C2",
+        "name": "洛卡纳挑战赛 Year 2",
+        "status": "待复核（未见END）",
+        "evidence": "稳定无END（待复核）"
+      },
+      {
+        "series": "推广卡",
+        "code": "C1",
+        "name": "洛卡纳挑战赛 Year 1",
+        "status": "待复核（未见END）",
+        "evidence": "稳定无END（待复核）"
+      },
+      {
+        "series": "推广卡",
+        "code": "D23·EN",
+        "name": "D23 2024 活动特典",
+        "status": "待复核（未见END）",
+        "evidence": "稳定无END（待复核）"
+      }
+    ]
+  }
+]
