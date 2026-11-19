@@ -47,14 +47,14 @@ jobs:
           & $env:PYTHON_EXE --version
           exit $LASTEXITCODE
       - name: Install dependencies and test
-        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
+        shell: ${{ inputs.phase == 'repair' && 'pwsh' || 'powershell' }}
         run: |
           & $env:PYTHON_EXE -m pip install -r requirements.txt
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           & $env:PYTHON_EXE -m unittest discover -s tests -v
           exit $LASTEXITCODE
       - name: Collect, repair and sync
-        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
+        shell: ${{ inputs.phase == 'repair' && 'pwsh' || 'powershell' }}
         env:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           SPREADSHEET_ID: ${{ vars.SPREADSHEET_ID }}
