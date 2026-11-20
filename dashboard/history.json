@@ -1,5 +1,37 @@
 [
   {
+    "started_at": "2026-11-20T14:34:04+08:00",
+    "phase": "phase1",
+    "status": "失败（未写入）",
+    "applied": false,
+    "applied_phases": [],
+    "warnings": [],
+    "run_id": "44688661370",
+    "attempt": "1",
+    "run_url": "https://github.com/Peppa-1202/jihuanshe/actions/runs/44688661370",
+    "before": {
+      "products": 34,
+      "cards": 6727,
+      "noncards": 214,
+      "review": 7,
+      "failed": 0
+    },
+    "repair": {
+      "moved": 0,
+      "types": {},
+      "products": []
+    },
+    "error": "Phase1 扫描未完整完成；不覆盖在线产品清单。已核验部分保存在运行附件。",
+    "after": {
+      "products": 34,
+      "cards": 6727,
+      "noncards": 214,
+      "review": 7,
+      "failed": 0
+    },
+    "finished_at": "2026-11-20T15:49:08+08:00"
+  },
+  {
     "started_at": "2026-11-20T14:29:25+08:00",
     "status": "未取得运行报告：failure",
     "phase": "phase3",
