@@ -27,7 +27,7 @@ jobs:
     timeout-minutes: 350
     defaults:
       run:
-          shell: ${{ inputs.phase == 'repair' && 'pwsh' || 'powershell' }}
+        shell: python
     env:
       PYTHON_EXE: ${{ inputs.phase == 'repair' && 'python' || 'C:\ProgramData\miniconda3\envs\jh_env\python.exe' }}
     steps:
@@ -38,23 +38,22 @@ jobs:
           python-version: '3.12'
       - name: Use local Miniconda Python
         if: runner.os == 'Windows'
-        shell: powershell
+        shell: cmd
         run: |
-          if (-not (Test-Path -LiteralPath $env:PYTHON_EXE -PathType Leaf)) {
-            throw "Python executable not found: $env:PYTHON_EXE"
-          }
-          $pythonDir = Split-Path -Parent $env:PYTHON_EXE
-          $pythonPaths = @($pythonDir, "$pythonDir\Scripts", "$pythonDir\Library\bin")
-          $env:PATH = ($pythonPaths -join ';') + ';' + $env:PATH
-          $pythonPaths | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-          & $env:PYTHON_EXE --version
-          exit $LASTEXITCODE
+          if not exist "%PYTHON_EXE%" exit /b 1
+          for %%I in ("%PYTHON_EXE%") do (
+            >>"%GITHUB_PATH%" echo %%~dpI
+            >>"%GITHUB_PATH%" echo %%~dpIScripts
+            >>"%GITHUB_PATH%" echo %%~dpILibrary\bin
+          )
+          "%PYTHON_EXE%" --version
       - name: Install dependencies and test
         run: |
-          & $env:PYTHON_EXE -m pip install -r requirements.txt
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          & $env:PYTHON_EXE -m unittest discover -s tests -v
-          exit $LASTEXITCODE
+          import os
+          import subprocess
+          python = os.environ["PYTHON_EXE"]
+          subprocess.run([python, "-m", "pip", "install", "-r", "requirements.txt"], check=True)
+          subprocess.run([python, "-m", "unittest", "discover", "-s", "tests", "-v"], check=True)
       - name: Collect, repair and sync
         env:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
@@ -66,11 +65,13 @@ jobs:
           REFRESH: ${{ inputs.refresh }}
           PYTHONUTF8: '1'
         run: |
-          $opts = @('--phase', $env:PHASE, '--output', 'output')
-          if ($env:APPLY -eq 'true') { $opts += '--apply' }
-          if ($env:REFRESH -eq 'true') { $opts += '--refresh' }
-          & $env:PYTHON_EXE -u run_sync.py @opts
-          exit $LASTEXITCODE
+          import os
+          import subprocess
+          args = [os.environ["PYTHON_EXE"], "-u", "run_sync.py", "--phase", os.environ["PHASE"], "--output", "output"]
+          for name in ("apply", "refresh"):
+              if os.environ[name.upper()].lower() == "true":
+                  args.append("--" + name)
+          raise SystemExit(subprocess.call(args))
       - name: Save run report
         if: always()
         uses: actions/upload-artifact@v4
