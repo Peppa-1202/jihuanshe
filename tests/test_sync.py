@@ -122,7 +122,7 @@ class TableTests(unittest.TestCase):
             with patch('sys.argv',['run_sync.py','--phase','repair','--output',d]):
                 self.assertEqual(main(),0)
             mock.return_value.apply.assert_not_called()
-            r=json.loads((Path(d)/'report.json').read_text())
+            r=json.loads((Path(d)/'report.json')..read_text(encoding="utf-8"))
             self.assertFalse(r['applied']);self.assertEqual(r['repair']['moved'],1)
     def test_dashboard_rerun_identity_and_history(self):
         with tempfile.TemporaryDirectory() as d:
@@ -131,6 +131,6 @@ class TableTests(unittest.TestCase):
             self.assertEqual(len(json.loads((Path(d)/'history.json').read_text())),1)
             r={**r,'attempt':'2','status':'失败'};publish(r,d)
             self.assertEqual(len(json.loads((Path(d)/'history.json').read_text())),2)
-            self.assertIn('运行历史',(Path(d)/'README.md').read_text())
+            self.assertIn('运行历史',(Path(d)/'README.md')..read_text(encoding="utf-8"))
 
 if __name__=='__main__':unittest.main()
