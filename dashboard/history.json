@@ -1,5 +1,17 @@
 [
   {
+    "started_at": "2026-11-20T14:20:58+08:00",
+    "status": "未取得运行报告：failure",
+    "phase": "phase3",
+    "applied": false,
+    "run_id": "44687047888",
+    "attempt": "1",
+    "run_url": "https://github.com/Peppa-1202/jihuanshe/actions/runs/44687047888",
+    "warnings": [
+      "报告缺失，不能据此判断表格是否发生过写入；请检查 Actions 日志。"
+    ]
+  },
+  {
     "started_at": "2026-11-20T11:31:43+08:00",
     "phase": "repair",
     "status": "完成（有待复核）",
