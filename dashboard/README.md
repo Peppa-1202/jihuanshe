@@ -6,7 +6,7 @@
 
 ## 最近一次
 
-状态：**未取得运行报告：failure**；模式：phase3；时间：2026-11-20T14:20:58+08:00
+状态：**未取得运行报告：failure**；模式：phase3；时间：2026-11-20T14:29:25+08:00
 
 实际写入：否；已同步阶段：无
 
@@ -28,6 +28,7 @@
 
 | 时间（北京时间） | 阶段 | 状态 | 写入 | 卡牌 | 非卡 | 待复核 | 运行详情 |
 | --- | --- | --- | --- | ---: | ---: | ---: | --- |
+| 2026-11-20T14:29:25+08:00 | phase3 | 未取得运行报告：failure | 否 | — | — | — | [Actions](https://github.com/Peppa-1202/jihuanshe/actions/runs/44688057372) |
 | 2026-11-20T14:20:58+08:00 | phase3 | 未取得运行报告：failure | 否 | — | — | — | [Actions](https://github.com/Peppa-1202/jihuanshe/actions/runs/44687047888) |
 | 2026-11-20T11:31:43+08:00 | repair | 完成（有待复核） | 是 | 6727 | 214 | 7 | [Actions](https://github.com/Peppa-1202/jihuanshe/actions/runs/44668315311) |
 | 2026-11-20T11:21:54+08:00 | repair | 预览：完成（有待复核） | 否 | 6727 | 214 | 7 | [Actions](https://github.com/Peppa-1202/jihuanshe/actions/runs/44667181842) |
