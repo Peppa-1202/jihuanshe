@@ -134,13 +134,14 @@ def main():
         baseline=gs.snapshot()
         tables={k:deepcopy(v['records']) for k,v in baseline.items()}
         report['before']=stats(tables)
-        tables['cards'],tables['noncards'],tables['checks'],report['repair']=repair(tables['cards'],tables['noncards'],tables['checks'])
+        if args.phase == 'repair':
+            tables['cards'],tables['noncards'],tables['checks'],report['repair']=repair(tables['cards'],tables['noncards'],tables['checks'])
         if not tables['details']:
             tables['details']=bootstrap_details(tables['inventory'],tables['checks'],tables['multi'])
         for k,spec in SPECS.items():
             write_csv(work/spec[3],spec[2],tables[k])
         if args.phase == 'repair':
-            desired={k:tables[k] for k in ['cards','noncards','checks','details']}
+            desired={k:tables[k] for k in ['cards','noncards','checks']}
             validate_phase3(tables)
             if args.apply:
                 gs.apply(baseline,desired)
@@ -172,16 +173,12 @@ def main():
                     rc=rc or 1
                 if phase=='phase3':
                     tables['cards'],tables['noncards'],tables['checks'],extra=repair(tables['cards'],tables['noncards'],tables['checks'])
-                    report['repair']['moved']+=extra['moved']
+                    report['repair']=extra
                     validate_phase3(tables)
                 if rc:
                     report['warnings'].append(f'{phase} 返回 {rc}：保留已采集结果和失败/待复核状态，不宣称完整。')
                     exit_code=1
                 desired={k:tables[k] for k in names}
-                # Include the historical merchandise correction in the first atomic commit.
-                if not report['applied_phases']:
-                    desired.update({k:tables[k] for k in ['cards','noncards','checks','details']})
-                    validate_phase3(tables)
                 if args.apply:
                     gs.apply(baseline,desired)
                     report['applied']=True;report['applied_phases'].append(phase)

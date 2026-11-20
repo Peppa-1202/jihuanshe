@@ -5,8 +5,8 @@ on:
       phase:
         description: 'repair=仅纠正在线表格；all=模拟器完整采集；phase1/2/3=单阶段'
         type: choice
-        options: [repair, all, phase1, phase2, phase3]
-        default: repair
+        options: [all, phase1, phase2, phase3, repair]
+        default: all
       apply:
         description: '将结果写入 Google 表格（关闭则仅预览）'
         type: boolean

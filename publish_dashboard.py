@@ -20,7 +20,7 @@ def publish(report, destination):
     history=[r for r in history if identity(r)!=identity(report)]+[report]
     history=sorted(history,key=lambda r:r.get('started_at',''),reverse=True)[:200]
     path.write_text(json.dumps(history,ensure_ascii=False,indent=2),encoding='utf-8')
-    lines=['# 集换社洛卡纳运行看板','','[运行工作流](../.github/workflows/sync.yml) · [配置说明](../README.md)', '',
+    lines=['# 集换社洛卡纳运行看板','','[运行工作流](../../actions/workflows/sync.yml) · [配置说明](../README.md)', '',
            '每次运行后自动更新；保留最近 200 次记录，较早记录可从 Git 历史查看。', '',
            '## 最近一次', '',summary(history[0]).replace('# 集换社洛卡纳运行总结','').strip(), '',
            '## 运行历史', '', '| 时间（北京时间） | 阶段 | 状态 | 写入 | 卡牌 | 非卡 | 待复核 | 运行详情 |',

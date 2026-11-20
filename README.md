@@ -20,7 +20,7 @@ Phase 1–3 以在线表格为数据源和最终输出，CSV 只作为每次运�
 | Phase 3 | 3.all non-cards(Myself) | 679165075 | 周边及密封商品 |
 | Phase 3 | 3.all products check(Myself) | 1116477578 | 每个产品的数量核对和完成依据 |
 
-此前给 Phase 2 的 gid 1829516308 实际是 Phase 1 两列数量页，因此单独新增了十五列详情页。初次迁移只恢复已有清单/核对表能确认的字段，未知首页字段和发售日期留空，状态为“待重新读取详情”。第一次采集请选 `all` 或先选 `phase2`；不要把迁移记录当作新采集完成结果。
+Phase 2 原链接的 gid 1829516308 指向 Phase 1 的两列数量页。Phase 2 沿用工作簿中现有的详情页和多子类父产品页。单阶段只写上表中本阶段的页签，`repair` 只写 Phase 3 三张页签。初次迁移只恢复已有清单/核对表能确认的字段，未知首页字段和发售日期留空，状态为“待重新读取详情”。第一次采集请选 `all` 或先选 `phase2`；不要把迁移记录当作新采集完成结果。
 
 ## 一次性配置
 
@@ -54,7 +54,7 @@ Phase 1–3 以在线表格为数据源和最终输出，CSV 只作为每次运�
 
 ## 日常运行
 
-打开 Actions → **Sync Jihuanshe to Google Sheets** → **Run workflow**（默认分支）：
+打开 Actions → **Sync Jihuanshe to Google Sheets** → **Run workflow**，选择默认分支 `main`。日常更新保留默认的 `all`、`apply` 和 `refresh`，即可重新采集并写回。
 
 | phase | 执行位置 | 行为 |
 | --- | --- | --- |
