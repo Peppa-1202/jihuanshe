@@ -4,7 +4,7 @@ from pathlib import Path
 import tempfile
 import unittest
 import xml.etree.ElementTree as ET
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import jhs_lorcana_en_phase3_all_fix7 as p3
 from jhs_tables import repair, repair_csv_files, SPECS, bootstrap_details, write_csv, read_csv
@@ -132,5 +132,93 @@ class TableTests(unittest.TestCase):
             r={**r,'attempt':'2','status':'失败'};publish(r,d)
             self.assertEqual(len(json.loads((Path(d)/'history.json').read_text())),2)
             self.assertIn('运行历史',(Path(d)/'README.md').read_text(encoding="utf-8"))
+
+
+class Phase3ReviewTests(unittest.TestCase):
+    def test_count_mismatch_and_pending_details_sync_successfully(self):
+        self.run_workflow(p3.REVIEW_EXIT_CODE, expected_exit=0, writes=True)
+
+    def test_product_capture_failure_remains_failure(self):
+        self.run_workflow(p3.PRODUCT_FAILURE_EXIT_CODE, expected_exit=1, writes=True)
+
+    def test_unexpected_exit_does_not_publish(self):
+        self.run_workflow(1, expected_exit=1, writes=False)
+
+    def test_write_failure_remains_failure(self):
+        self.run_workflow(p3.REVIEW_EXIT_CODE, expected_exit=1, writes=True, write_error=True)
+
+    def run_workflow(self, collector_exit, expected_exit, writes, write_error=False):
+        baseline = {k: {'records': []} for k in SPECS}
+        baseline['cards']['records'] = [record('R', '测试卡')]
+        baseline['checks']['records'] = [{**check(), '收录商品数量': 0, '卡牌核对': '一致', '总项目核对': '不一致'}]
+        baseline['details']['records'] = [
+            {'系列': '推广卡', '列表编号': 'P3', '列表名称': 'Year 3 推广卡', '统计状态': '待重新读取详情'},
+        ]
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            adb = root / 'adb.exe'
+            adb.touch()
+            argv = ['run_sync.py', '--phase', 'phase3', '--apply', '--adb', str(adb), '--output', d]
+            sheets = Mock()
+            sheets.snapshot.return_value = baseline
+            if write_error:
+                sheets.apply.side_effect = RuntimeError('写入失败')
+            with (patch('sys.argv', argv), patch('run_sync.GoogleSheets', return_value=sheets),
+                  patch('run_sync.subprocess.run', return_value=Mock(returncode=0, stdout='device')),
+                  patch('run_sync.execute_phase', return_value=collector_exit)):
+                self.assertEqual(main(), expected_exit)
+            self.assertEqual(sheets.apply.called, writes)
+            report = json.loads((root / 'report.json').read_text(encoding='utf-8'))
+            self.assertEqual(report['applied'], writes and not write_error)
+            if expected_exit:
+                self.assertIn('失败', report['status'])
+                return
+            self.assertEqual(report['status'], '完成（有待复核）')
+            self.assertEqual(report['review_products'][0]['total_check'], '不一致')
+            self.assertEqual(report['review_products'][0]['page_products'], 0)
+            self.assertEqual(report['phase3_pending'][0]['code'], 'P3')
+            publish(report, root / 'dashboard')
+            for report_path in [root / 'summary.md', root / 'dashboard' / 'README.md']:
+                rendered = report_path.read_text(encoding='utf-8')
+                self.assertIn('人工复核', rendered)
+                self.assertIn('Year 3 推广卡', rendered)
+
+    def test_collector_reports_review_for_an_unready_phase2(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            details = root / 'details.csv'
+            write_csv(details, SPECS['details'][2], [
+                {'系列': '推广卡', '列表编号': 'P3', '列表名称': 'Year 3', '统计状态': '待重新读取详情'},
+            ])
+            args = ['phase3', '--details', str(details), '--check-output', str(root / 'checks.csv')]
+            with patch('sys.argv', args + ['--report-review']):
+                self.assertEqual(p3.main(), p3.REVIEW_EXIT_CODE)
+            pending = read_csv(root / 'checks_unprocessed.csv')
+            self.assertEqual(pending[0]['列表编号'], 'P3')
+            self.assertIn('待重新读取详情', pending[0]['未处理原因'])
+
+    def test_collector_preserves_mismatched_counts_for_review(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            details = root / 'details.csv'
+            checks = root / 'checks.csv'
+            write_csv(details, SPECS['details'][2], [
+                {'系列': '推广卡', '列表编号': 'P3', '列表名称': 'Year 3',
+                 '页面张数': 1, '收录商品数量': 1, '统计状态': '完成'},
+            ])
+            args = ['phase3', '--details', str(details), '--check-output', str(checks),
+                    '--output', str(root / 'cards.csv'), '--noncard-output', str(root / 'noncards.csv'),
+                    '--report-review']
+            with (patch('sys.argv', args), patch.object(p3, '_LAST_POOL_END', 'END'),
+                  patch.object(p3, 'ensure_library_home_page'), patch.object(p3, 'ensure_category_page'),
+                  patch.object(p3, 'open_category_product'),
+                  patch.object(p3, 'collect_one_card_pool',
+                               return_value=([record('R', '测试卡')], [record()]))):
+                self.assertEqual(p3.main(), p3.REVIEW_EXIT_CODE)
+            saved = read_csv(checks)[0]
+            self.assertEqual((saved['卡牌核对'], saved['总项目核对']), ('一致', '不一致'))
+            self.assertEqual(saved['抓取总项目数'], '2')
+            self.assertIn('待复核', saved['统计状态'])
+
 
 if __name__=='__main__':unittest.main()

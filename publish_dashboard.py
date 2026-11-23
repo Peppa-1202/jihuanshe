@@ -32,11 +32,6 @@ def publish(report, destination):
         lines.append('| '+' | '.join([safe(r.get('started_at','')),safe(r.get('phase','')),safe(r.get('status','')),
             '是' if r.get('applied') else '否',str(counts.get('cards','—')),str(counts.get('noncards','—')),
             str(counts.get('review','—')),link])+' |')
-    reviews=history[0].get('review_products',[])
-    if reviews:
-        lines += ['', '## 最新待复核产品', '', '| 系列 | 编号 | 名称 | 状态 | 完成依据 |', '| --- | --- | --- | --- | --- |']
-        for r in reviews:
-            lines.append('| '+' | '.join(safe(r.get(k,'')) for k in ['series','code','name','status','evidence'])+' |')
     (destination/'README.md').write_text('\n'.join(lines)+'\n',encoding='utf-8')
 
 

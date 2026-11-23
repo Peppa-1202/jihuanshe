@@ -50,6 +50,8 @@ REMOTE_XML = "/sdcard/Download/jhs_lorcana_en_phase3.xml"
 SCRIPT_VERSION = "2026-11-19-lorcana-entry-phase3-all-v8-noncard-sheets"
 TARGET_LANGUAGE = "英文"
 _LAST_POOL_END = "未确认"
+REVIEW_EXIT_CODE = 3
+PRODUCT_FAILURE_EXIT_CODE = 4
 
 CARD_COLUMNS = [
     "系列",
@@ -2602,6 +2604,7 @@ def build_parser() -> argparse.ArgumentParser:
         default=0,
         help="本次最多处理几个产品；0 表示不限。",
     )
+    parser.add_argument("--report-review", action="store_true", help=argparse.SUPPRESS)
     return parser
 
 
@@ -2651,6 +2654,9 @@ def main() -> int:
         ]
 
     if not targets:
+        if args.report_review and excluded and not args.only:
+            print("没有就绪的产品，本次保留已有结果并报告待复核清单。", flush=True)
+            return REVIEW_EXIT_CODE
         raise SystemExit(
             f"没有找到可抓取目标。系列={series_list!r}，only={args.only!r}"
         )
@@ -2699,9 +2705,12 @@ def main() -> int:
         print("已指定 --redo：本次强制重抓全部所选产品。", flush=True)
     elif reusable_count == len(targets):
         print("全部所选产品已有可复用结果，无需操作模拟器。", flush=True)
-        return 1 if excluded else 0
+        if excluded:
+            return REVIEW_EXIT_CODE if args.report_review else 1
+        return 0
     attempted = 0
     matched = 0
+    product_failed = False
 
     with tempfile.TemporaryDirectory(prefix="jhs_phase3_") as temp_dir:
         local_xml = Path(temp_dir) / "page.xml"
@@ -2893,7 +2902,6 @@ def main() -> int:
                 if overall_ok:
                     matched += 1
                 else:
-                    dump_current_page(args.adb, args.serial, local_xml)
                     failed_xml = script_dir / Path("jhs_lorcana_en_phase3_all_last_failed.xml")
                     save_xml_copy(local_xml, failed_xml)
                     print(
@@ -2911,6 +2919,7 @@ def main() -> int:
                 print("\n已手动停止；已完成产品均已保存。", flush=True)
                 return 130
             except Exception as exc:
+                product_failed = True
                 try:
                     dump_current_page(args.adb, args.serial, local_xml)
                     failed_xml = script_dir / Path("jhs_lorcana_en_phase3_all_last_failed.xml")
@@ -2968,7 +2977,11 @@ def main() -> int:
         row.get("系列", ""), row.get("详情编号", "").strip() or row.get("列表编号", "").strip(),
         row.get("详情名称", "").strip() or row.get("列表名称", "").strip()) not in final_reusable for row in targets)
     print(f"本次所选目标仍未完成：{remaining}；Phase2 未就绪：{len(excluded)}。", flush=True)
-    return 1 if remaining or excluded else 0
+    if product_failed:
+        return PRODUCT_FAILURE_EXIT_CODE if args.report_review else 1
+    if remaining or excluded:
+        return REVIEW_EXIT_CODE if args.report_review else 1
+    return 0
 
 
 if __name__ == "__main__":

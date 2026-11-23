@@ -88,11 +88,45 @@ def execute_phase(phase, work, args):
             flags.append('--retry-all')
     else:
         script = 'jhs_lorcana_en_phase3_all_fix7.py'
-        flags = base + ['--details', paths['details'], '--output', paths['cards'], '--noncard-output', paths['noncards'], '--check-output', paths['checks']]
+        flags = base + ['--details', paths['details'], '--output', paths['cards'],
+                        '--noncard-output', paths['noncards'], '--check-output', paths['checks'],
+                        '--report-review']
         if args.refresh:
             flags.append('--redo')
     print('运行阶段：', phase, flush=True)
     return subprocess.run([sys.executable, '-u', str(ROOT/script), *flags], cwd=ROOT).returncode
+
+
+def review_products(checks):
+    fields = {
+        'series': '系列', 'code': '详情编号', 'name': '详情名称', 'status': '统计状态',
+        'evidence': '完成依据', 'page_cards': '页面张数', 'page_products': '收录商品数量',
+        'cards': '抓取卡牌数', 'noncards': '抓取非卡数', 'total': '抓取总项目数',
+        'card_check': '卡牌核对', 'total_check': '总项目核对',
+    }
+    return [{label: row.get(column, '') for label, column in fields.items()} for row in checks
+            if not p3.finished_and_matched({k: str(v) for k, v in row.items()})]
+
+
+def phase3_pending(details):
+    pending = []
+    for row in details:
+        reason = p3.target_skip_reason({k: str(v) for k, v in row.items()})
+        if reason:
+            pending.append({'series': row.get('系列', ''), 'code': row.get('列表编号', ''),
+                            'name': row.get('列表名称', ''), 'reason': reason})
+    return pending
+
+
+def review_table(title, records, columns):
+    if not records:
+        return []
+    def escape(value):
+        return str(value if value is not None and value != '' else '—').replace(
+            '|', '&#124;').replace('\n', ' ').replace('\r', ' ').replace('<', '&lt;').replace('>', '&gt;')
+    return ['', f'### {title}', '', '| ' + ' | '.join(label for _, label in columns) + ' |',
+            '| ' + ' | '.join('---' for _ in columns) + ' |',
+            *['| ' + ' | '.join(escape(record.get(k)) for k, _ in columns) + ' |' for record in records]]
 
 
 def summary(report):
@@ -109,6 +143,16 @@ def summary(report):
         lines += ['', '- ' + warning]
     if report.get('error'):
         lines += ['', '错误：' + report['error']]
+    identity_columns = [('series', '系列'), ('code', '编号'), ('name', '产品')]
+    lines += review_table('人工复核：产品数量与采集状态', report.get('review_products', []), [
+        *identity_columns, ('status', '状态'), ('evidence', '完成依据'),
+        ('page_cards', '页面张数'), ('page_products', '页面收录商品'),
+        ('cards', '实抓卡牌'), ('noncards', '实抓非卡'), ('total', '实抓合计'),
+        ('card_check', '卡牌核对'), ('total_check', '总项目核对'),
+    ])
+    lines += review_table('待补跑：Phase 2 未就绪的产品', report.get('phase3_pending', []), [
+        *identity_columns, ('reason', '未处理原因'),
+    ])
     return '\n'.join(lines)+'\n'
 
 
@@ -158,6 +202,8 @@ def main():
                 rc=execute_phase(phase,work,args)
                 if phase=='phase1' and rc:
                     raise RuntimeError('Phase1 扫描未完整完成；不覆盖在线产品清单。已核验部分保存在运行附件。')
+                if phase == 'phase3' and rc not in (0, p3.REVIEW_EXIT_CODE, p3.PRODUCT_FAILURE_EXIT_CODE):
+                    raise RuntimeError(f'Phase 3 异常退出（退出码 {rc}）；本阶段未写入 Google 表格。')
                 names={'phase1':['inventory','counts'],'phase2':['details','multi'],'phase3':['cards','noncards','checks']}[phase]
                 for k in names:
                     records=typed(read_csv(work/SPECS[k][3]))
@@ -175,9 +221,17 @@ def main():
                     tables['cards'],tables['noncards'],tables['checks'],extra=repair(tables['cards'],tables['noncards'],tables['checks'])
                     report['repair']=extra
                     validate_phase3(tables)
-                if rc:
+                    report['phase3_pending'] = phase3_pending(tables['details'])
+                    pending_count = len(report['phase3_pending'])
+                    if pending_count:
+                        report['warnings'].append(f'Phase 2 有 {pending_count} 个产品未就绪，已列入待补跑清单。')
+                if phase == 'phase3' and rc == p3.REVIEW_EXIT_CODE:
+                    report['warnings'].append('Phase 3 已完成可处理的产品。数量或完成依据待确认的产品已列入人工复核清单。')
+                elif rc:
                     report['warnings'].append(f'{phase} 返回 {rc}：保留已采集结果和失败/待复核状态，不宣称完整。')
                     exit_code=1
+                    if phase == 'phase3':
+                        report['error'] = 'Phase 3 有产品采集报错，详情见产品复核清单及采集日志。'
                 desired={k:tables[k] for k in names}
                 if args.apply:
                     gs.apply(baseline,desired)
@@ -186,13 +240,13 @@ def main():
                 if rc and phase=='phase2':
                     break
         report['after']=stats(tables)
-        report['review_products']=[{'series':r.get('系列',''),'code':r.get('详情编号',''),'name':r.get('详情名称',''),
-            'status':r.get('统计状态',''),'evidence':r.get('完成依据','')} for r in tables['checks']
-            if not p3.finished_and_matched({k:str(v) for k,v in r.items()})]
+        report['review_products'] = review_products(tables['checks'])
         if report['after']['review']:
             report['warnings'].append(f"现有核对表仍有 {report['after']['review']} 个产品待复核；未修改其采集完成依据。")
         report['status']='完成（有待复核）' if report['warnings'] else '完成'
-        if not args.apply:
+        if report.get('error'):
+            report['status'] = '失败（已有结果保留）' if report['applied'] else '失败（未写入）'
+        elif not args.apply:
             report['status']='预览：'+report['status']
     except Exception as exc:
         report['status']='失败（此前已同步阶段保留）' if report['applied'] else '失败（未写入）'
