@@ -1,5 +1,137 @@
 [
   {
+    "started_at": "2026-11-23T10:00:06+08:00",
+    "phase": "all",
+    "status": "完成（有待复核）",
+    "applied": true,
+    "applied_phases": [
+      "phase1",
+      "phase2"
+    ],
+    "warnings": [
+      "phase2 返回 1：保留已采集结果和失败/待复核状态，不宣称完整。",
+      "现有核对表仍有 7 个产品待复核；未修改其采集完成依据。"
+    ],
+    "run_id": "45097634108",
+    "attempt": "1",
+    "run_url": "https://github.com/Peppa-1202/jihuanshe/actions/runs/45097634108",
+    "before": {
+      "products": 34,
+      "cards": 6727,
+      "noncards": 214,
+      "review": 7,
+      "failed": 0
+    },
+    "after": {
+      "products": 34,
+      "cards": 6727,
+      "noncards": 214,
+      "review": 7,
+      "failed": 0
+    },
+    "review_products": [
+      {
+        "series": "简体中文",
+        "code": "PR",
+        "name": "[简中]活动PR",
+        "status": "待复核（未见END）",
+        "evidence": "稳定无END（待复核）",
+        "page_cards": 3,
+        "page_products": 13,
+        "cards": 13,
+        "noncards": 0,
+        "total": 13,
+        "card_check": "不一致",
+        "total_check": "一致"
+      },
+      {
+        "series": "推广卡",
+        "code": "P3",
+        "name": "Year 3 推广卡",
+        "status": "抓取完成（END，数量待复核）",
+        "evidence": "END",
+        "page_cards": 55,
+        "page_products": 1,
+        "cards": 55,
+        "noncards": 1,
+        "total": 56,
+        "card_check": "一致",
+        "total_check": "不一致"
+      },
+      {
+        "series": "推广卡",
+        "code": "P2",
+        "name": "Year 2 推广卡",
+        "status": "抓取完成（END，数量待复核）",
+        "evidence": "END",
+        "page_cards": 37,
+        "page_products": 2,
+        "cards": 37,
+        "noncards": 2,
+        "total": 39,
+        "card_check": "一致",
+        "total_check": "不一致"
+      },
+      {
+        "series": "推广卡",
+        "code": "P1",
+        "name": "Year 1 推广卡",
+        "status": "抓取完成（END，数量待复核）",
+        "evidence": "END",
+        "page_cards": 39,
+        "page_products": 2,
+        "cards": 39,
+        "noncards": 2,
+        "total": 41,
+        "card_check": "一致",
+        "total_check": "不一致"
+      },
+      {
+        "series": "推广卡",
+        "code": "C2",
+        "name": "洛卡纳挑战赛 Year 2",
+        "status": "待复核（未见END）",
+        "evidence": "稳定无END（待复核）",
+        "page_cards": 3,
+        "page_products": 13,
+        "cards": 13,
+        "noncards": 0,
+        "total": 13,
+        "card_check": "不一致",
+        "total_check": "一致"
+      },
+      {
+        "series": "推广卡",
+        "code": "C1",
+        "name": "洛卡纳挑战赛 Year 1",
+        "status": "待复核（未见END）",
+        "evidence": "稳定无END（待复核）",
+        "page_cards": 5,
+        "page_products": 9,
+        "cards": 9,
+        "noncards": 0,
+        "total": 9,
+        "card_check": "不一致",
+        "total_check": "一致"
+      },
+      {
+        "series": "推广卡",
+        "code": "D23·EN",
+        "name": "D23 2024 活动特典",
+        "status": "待复核（未见END）",
+        "evidence": "稳定无END（待复核）",
+        "page_cards": 1,
+        "page_products": 2,
+        "cards": 2,
+        "noncards": 0,
+        "total": 2,
+        "card_check": "不一致",
+        "total_check": "一致"
+      }
+    ],
+    "finished_at": "2026-11-23T10:07:33+08:00"
+  },
+  {
     "started_at": "2026-11-23T09:43:09+08:00",
     "phase": "phase3",
     "status": "完成（有待复核）",
